@@ -31,7 +31,7 @@ function CreateNew() {
     const result = await axios.post('/api/get-video-script', {
       prompt:prompt
     }).then(resp=>{
-      // console.log(resp.data.result);
+      console.log(resp.data.result);
       setVideoScript(resp.data.result);
       GenerateAudioFile(resp.data.result);
     })
@@ -43,9 +43,9 @@ const GenerateAudioFile=async(videoScript)=>{
   let script='';
   const id = uuidv4();
   videoScript.forEach(item=>{
-    script=script+item.contentText+' ';
+    script=script+item.content+' ';
   })
-  // console.log(script);
+  console.log(script);
   await axios.post('/api/generate-audio',{
     text: script,
     id:id

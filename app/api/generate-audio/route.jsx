@@ -1,7 +1,7 @@
 import  textToSpeechClient  from "@google-cloud/text-to-speech";
 import { NextResponse } from "next/server";
 import { Result } from "postcss";
-const utils = require('util');
+const util = require('util');
 const fs = require("fs");
 
 const client = new textToSpeechClient.TextToSpeechClient({
@@ -15,7 +15,7 @@ export async function POST(req){
     const request = {
         input: {text: text},
         // select the language and ssml voice gender(optional).
-        voice: {languageCode: 'en-Us', ssmlGender: 'NEUTRAL'},
+        voice: {languageCode: 'en-Us', ssmlGender: 'MALE'},
         // select the type of audio encoding.
         audioConfig: {audioEncoding: 'MP3'},
     };
