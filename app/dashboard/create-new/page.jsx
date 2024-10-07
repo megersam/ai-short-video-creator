@@ -8,10 +8,14 @@ import axios from 'axios';
 import CustomLoading from './_components/CustomLoading';
 import { v4 as uuidv4 } from 'uuid';
 
+const FILE_URL='https://firebasestorage.googleapis.com/v0/b/ai-short-video-creator.appspot.com/o/ai-short-video-files%2Fecc6a118-f724-4c3b-9b53-c8758d17b2a4.mp3?alt=media&token=3ba07ac3-0fd3-43c7-b9e9-663a967be848'
+
 function CreateNew() {
    const [formData, setFormData]=useState([]);
    const [loading, setLoading]= useState(false);
    const [videoScript, setVideoScript]=useState();
+   const [audioFileUrl, setAudioFileUrl]=useState();
+   const [captions, setCaptions]=useState();
   const onHandleInputChange=(fieldName, fieldValue)=>{
      console.log(fieldName, fieldValue);
 
@@ -21,7 +25,8 @@ function CreateNew() {
      }))
   }
   const onCreateClickHandler=()=>{
-    GetVideoScript();
+    // GetVideoScript();
+    GenerateAudioCaption(FILE_URL);
   }
   // get video script.
   const GetVideoScript=async ()=>{
@@ -51,7 +56,20 @@ const GenerateAudioFile=async(videoScript)=>{
     id:id
   }).then(resp=>{
     console.log(resp.data);
+    setAudioFileUrl(resp.data.result);
   });
+  setLoading(false);
+}
+
+const GenerateAudioCaption= async (fileUrl)=>{
+  setLoading(true);
+  
+  await axios.post('/api/generate-caption',{
+    audioFileUrl:fileUrl
+  }).then(resp=>{
+    console.log(resp.data.result);
+    setCaptions(resp?.data?.result);
+  })
   setLoading(false);
 }
 
