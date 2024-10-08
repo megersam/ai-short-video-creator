@@ -27,6 +27,9 @@ export async function POST(req) {
     // Generate audio from text using Google Cloud TTS
     const [response] = await client.synthesizeSpeech(request);
 
+    // Handle inconsistent fields by normalizing to one consistent field
+    const normalizedText = response.content || response.contentText || "Default content if none available";
+
     // Convert binary response to Buffer for upload
     const audioBuffer = Buffer.from(response.audioContent, 'binary');
 
@@ -40,8 +43,8 @@ export async function POST(req) {
         console.log('Audio content successfully uploaded to Firebase');
         console.log('Firebase Download URL:', downloadUrl);
 
-        // Return the download URL as the response
-        return NextResponse.json({ result: downloadUrl });
+        // Return the download URL and normalized text as the response
+        return NextResponse.json({ result: downloadUrl, normalizedText });
     } catch (error) {
         console.error('Error uploading audio to Firebase or fetching download URL:', error);
         return NextResponse.json({ error: 'Failed to generate audio and upload to Firebase' });

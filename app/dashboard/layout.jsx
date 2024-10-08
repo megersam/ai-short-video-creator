@@ -9,7 +9,7 @@ function DashboardLayout({ children }) {
     const [videoData, setVideoData] = useState([]);
 
     return (
-        // <VideoDataContext.Provider  value={{videoData, setVideoData}}>
+        <VideoDataContext.Provider  value={{videoData, setVideoData}}>
 
       
         <div>
@@ -24,7 +24,7 @@ function DashboardLayout({ children }) {
                </div>
             </div>
         </div>
-        // {/* </VideoDataContext.Provider> */}
+         </VideoDataContext.Provider>
 
     )
 }

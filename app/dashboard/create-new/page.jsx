@@ -19,7 +19,7 @@ function CreateNew() {
   const [audioFileUrl, setAudioFileUrl] = useState();
   const [captions, setCaptions] = useState();
   const [imagList, setImageList] = useState();
-  // const {videoData, setVideoData} = useContext(VideoDataContext);
+  const {videoData, setVideoData} = useContext(VideoDataContext);
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     console.log(fieldName, fieldValue);
@@ -42,10 +42,10 @@ function CreateNew() {
       prompt: prompt
     })
     if (resp.data.result) {
-      // setVideoData(prev=>({
-      //   ...prev,
-      //   'videoScript': resp.data.result
-      // }))
+      setVideoData(prev=>({
+        ...prev,
+        'videoScript': resp.data.result
+      }))
       setVideoScript(resp.data.result);
       await GenerateAudioFile(resp.data.result);
     }
@@ -56,10 +56,11 @@ function CreateNew() {
     let script = '';
     const id = uuidv4();
     videoScriptData.forEach(item => {
-      script = script + item.content + ' ';
+      script += (item.content || item.contentText) + ' ';
     });
 
     // Call the API to generate audio and get the Firebase URL
+   try {
     const resp = await axios.post('/api/generate-audio', {
       text: script,
       id: id
@@ -67,18 +68,18 @@ function CreateNew() {
 
     if (resp.data.result) {
       const firebaseAudioUrl = resp.data.result;
-      console.log('Firebase Audio URL:', firebaseAudioUrl);
-
-      // Store the Firebase URL in state
-      // setVideoData((prev) => ({
-      //     ...prev,
-      //     'audioFileUrl': firebaseAudioUrl
-      // }));
+      setVideoData((prev) => ({
+          ...prev,
+          'audioFileUrl': firebaseAudioUrl
+      }));
       setAudioFileUrl(firebaseAudioUrl);
 
       // Call the caption generation function with the Firebase URL
       await GenerateAudioCaption(firebaseAudioUrl, videoScriptData);
     }
+   } catch (error) {
+     console.log('Error:', e);
+   }
   };
 
 
@@ -90,8 +91,13 @@ function CreateNew() {
       });
 
       if (resp.data.result) {
-        console.log('Captions:', resp.data.result);
+        //console.log('Captions:', resp.data.result);
+        // Store the captions in state
         setCaptions(resp.data.result);
+        setVideoData(prev=>({
+          ...prev,
+          'captions': resp.data.result
+        }))
 
         await GenerateImage(videoScriptData);
       }
@@ -104,27 +110,42 @@ function CreateNew() {
 
 
   const GenerateImage = async (videoScriptData) => {
+    setLoading(true);  // Show loading while images are being generated
     let images = [];
-    for (const element of videoScriptData) {
-      try {
+  
+    try {
+      // Loop through each script element and generate an image
+      for (const element of videoScriptData) {
         const resp = await axios.post('/api/generate-image', {
-          prompt: element.imagePrompt
+          prompt: element.imagePrompt  // Ensure 'imagePrompt' field is in videoScriptData
         });
-        console.log(resp.data.result);
-        images.push(resp.data.result);
-      } catch (error) {
-        console.log('Error:', error);
+  
+        if (resp.data.result) {
+          //console.log('Firebase Image URL:', resp.data.result);
+          images.push(resp.data.result);  // Push the Firebase URL to images array
+        } else {
+          console.error('Failed to generate image for prompt:', element.imagePrompt);
+        }
       }
+
+      setVideoData(prev=>({
+        ...prev,
+        'images': images
+      }))
+  
+      // Set the images in state to be displayed or further processed
+      setImageList(images);  // Store generated image URLs in state
+    } catch (error) {
+      console.error('Error generating images:', error);
+    } finally {
+      setLoading(false);  // Hide loading when done
     }
-    // setVideoData(prev=>({
-    //   ...prev,
-    //   'imageList': resp.data.result 
-    // }))
-    setImageList(images);
-    setLoading(false);
-  }
+  };
+  
 
-
+useEffect(()=>{
+  console.log(videoData);
+}, [videoData]);
 
   return (
     <div className='md:px-20'>
