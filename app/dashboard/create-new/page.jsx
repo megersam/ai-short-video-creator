@@ -8,6 +8,9 @@ import axios from 'axios';
 import CustomLoading from './_components/CustomLoading';
 import { v4 as uuidv4 } from 'uuid';
 import { VideoDataContext } from '@/app/_context/VideoDataContext';
+import { useUser } from '@clerk/nextjs';
+import { db } from '@/configs/db';
+import { VideoData } from '@/configs/schema';
 
 
 
@@ -20,6 +23,8 @@ function CreateNew() {
   const [captions, setCaptions] = useState();
   const [imagList, setImageList] = useState();
   const {videoData, setVideoData} = useContext(VideoDataContext);
+  // get the account owner user data
+  const {user} = useUser();
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     console.log(fieldName, fieldValue);
@@ -82,7 +87,7 @@ function CreateNew() {
    }
   };
 
-
+// Generate the captions from the audio.
   const GenerateAudioCaption = async (fileUrl, videoScriptData) => {
     setLoading(true);
     try {
@@ -108,7 +113,7 @@ function CreateNew() {
     }
   };
 
-
+// generate the images from the propt created last time.
   const GenerateImage = async (videoScriptData) => {
     setLoading(true);  // Show loading while images are being generated
     let images = [];
@@ -130,7 +135,7 @@ function CreateNew() {
 
       setVideoData(prev=>({
         ...prev,
-        'images': images
+        'imageList': images
       }))
   
       // Set the images in state to be displayed or further processed
@@ -145,7 +150,28 @@ function CreateNew() {
 
 useEffect(()=>{
   console.log(videoData);
+  if(Object.keys(videoData).length==4){
+    SaveVideoData(videoData);
+  }
 }, [videoData]);
+
+
+// save the video to neo.
+const SaveVideoData = async (videoData) => {
+  setLoading(true);
+
+  const result=await db.insert(VideoData).values({
+    script:videoData?.videoScript,
+    audioFileUrl:videoData?.audioFileUrl,
+    captions:videoData?.captions,
+    imageList:videoData?.imageList,
+    createdBy:user?.primaryEmailAddress?.emailAddress,
+  }).returning({id:VideoData?.id});
+  console.log(result);
+  setLoading(false);
+   
+};
+
 
   return (
     <div className='md:px-20'>
