@@ -11,6 +11,7 @@ import { VideoDataContext } from '@/app/_context/VideoDataContext';
 import { useUser } from '@clerk/nextjs';
 import { db } from '@/configs/db';
 import { VideoData } from '@/configs/schema';
+import PlayerDialog from '../_components/PlayerDialog';
 
 
 
@@ -25,6 +26,10 @@ function CreateNew() {
   const {videoData, setVideoData} = useContext(VideoDataContext);
   // get the account owner user data
   const {user} = useUser();
+
+  // play video
+  const [playVideo, setPlayVideo] = useState(true);
+  const [videoId, setVideoId] = useState(1);
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     console.log(fieldName, fieldValue);
@@ -167,6 +172,9 @@ const SaveVideoData = async (videoData) => {
     imageList:videoData?.imageList,
     createdBy:user?.primaryEmailAddress?.emailAddress,
   }).returning({id:VideoData?.id});
+
+  setVideoId(result[0].id);
+  setPlayVideo(true);
   console.log(result);
   setLoading(false);
    
@@ -189,6 +197,7 @@ const SaveVideoData = async (videoData) => {
         <Button className='mt-10 w-full' onClick={onCreateClickHandler}>Create Short Video</Button>
       </div>
       <CustomLoading loading={loading} />
+      <PlayerDialog playVideo={playVideo} videoId={videoId}/>
     </div>
   )
 }
