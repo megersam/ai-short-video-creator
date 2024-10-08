@@ -12,55 +12,52 @@ import { useUser } from '@clerk/nextjs';
 import { db } from '@/configs/db';
 import { VideoData } from '@/configs/schema';
 import PlayerDialog from '../_components/PlayerDialog';
+import { useRouter } from 'next/navigation';
 
 
 
 function CreateNew() {
-
   const [formData, setFormData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [videoScript, setVideoScript] = useState();
   const [audioFileUrl, setAudioFileUrl] = useState();
   const [captions, setCaptions] = useState();
   const [imagList, setImageList] = useState();
-  const {videoData, setVideoData} = useContext(VideoDataContext);
-  // get the account owner user data
-  const {user} = useUser();
-
-  // play video
-  const [playVideo, setPlayVideo] = useState(true);
-  const [videoId, setVideoId] = useState(1);
+  const { videoData, setVideoData } = useContext(VideoDataContext);
+  const { user } = useUser(); 
+  const router = useRouter();
+  const [saved, setSaved] = useState(false);  // Added saved state
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     console.log(fieldName, fieldValue);
-
     setFormData(prev => ({
       ...prev,
       [fieldName]: fieldValue
-    }))
-  }
+    }));
+  };
+
   const onCreateClickHandler = () => {
     GetVideoScript();
+  };
 
-  }
   // get video script.
   const GetVideoScript = async () => {
     setLoading(true);
-    const prompt = 'Write a script to generate ' + formData.duration + ' video on topic ' + formData.topic + ' along with AI image propmt in ' + formData.imageStyle + ' format for each scene and give result in JSON format with image prompt and content Text as field, No plain Text'
+    const prompt = 'Write a script to generate ' + formData.duration + ' video on topic ' + formData.topic + ' along with AI image propmt in ' + formData.imageStyle + ' format for each scene and give result in JSON format with image prompt and content Text as field, No plain Text';
     console.log(prompt);
     const resp = await axios.post('/api/get-video-script', {
       prompt: prompt
-    })
+    });
     if (resp.data.result) {
-      setVideoData(prev=>({
+      setVideoData(prev => ({
         ...prev,
         'videoScript': resp.data.result
-      }))
+      }));
       setVideoScript(resp.data.result);
       await GenerateAudioFile(resp.data.result);
     }
   }
-  // generate the video by accepting the script written.
+
   const GenerateAudioFile = async (videoScriptData) => {
     setLoading(true);
     let script = '';
@@ -69,30 +66,26 @@ function CreateNew() {
       script += (item.content || item.contentText) + ' ';
     });
 
-    // Call the API to generate audio and get the Firebase URL
-   try {
-    const resp = await axios.post('/api/generate-audio', {
-      text: script,
-      id: id
-    });
+    try {
+      const resp = await axios.post('/api/generate-audio', {
+        text: script,
+        id: id
+      });
 
-    if (resp.data.result) {
-      const firebaseAudioUrl = resp.data.result;
-      setVideoData((prev) => ({
+      if (resp.data.result) {
+        const firebaseAudioUrl = resp.data.result;
+        setVideoData((prev) => ({
           ...prev,
           'audioFileUrl': firebaseAudioUrl
-      }));
-      setAudioFileUrl(firebaseAudioUrl);
-
-      // Call the caption generation function with the Firebase URL
-      await GenerateAudioCaption(firebaseAudioUrl, videoScriptData);
+        }));
+        setAudioFileUrl(firebaseAudioUrl);
+        await GenerateAudioCaption(firebaseAudioUrl, videoScriptData);
+      }
+    } catch (error) {
+      console.log('Error:', error);
     }
-   } catch (error) {
-     console.log('Error:', e);
-   }
   };
 
-// Generate the captions from the audio.
   const GenerateAudioCaption = async (fileUrl, videoScriptData) => {
     setLoading(true);
     try {
@@ -101,14 +94,11 @@ function CreateNew() {
       });
 
       if (resp.data.result) {
-        //console.log('Captions:', resp.data.result);
-        // Store the captions in state
         setCaptions(resp.data.result);
-        setVideoData(prev=>({
+        setVideoData(prev => ({
           ...prev,
           'captions': resp.data.result
-        }))
-
+        }));
         await GenerateImage(videoScriptData);
       }
     } catch (error) {
@@ -118,67 +108,62 @@ function CreateNew() {
     }
   };
 
-// generate the images from the propt created last time.
   const GenerateImage = async (videoScriptData) => {
-    setLoading(true);  // Show loading while images are being generated
+    setLoading(true);
     let images = [];
-  
+
     try {
-      // Loop through each script element and generate an image
       for (const element of videoScriptData) {
         const resp = await axios.post('/api/generate-image', {
-          prompt: element.imagePrompt  // Ensure 'imagePrompt' field is in videoScriptData
+          prompt: element.imagePrompt
         });
-  
+
         if (resp.data.result) {
-          //console.log('Firebase Image URL:', resp.data.result);
-          images.push(resp.data.result);  // Push the Firebase URL to images array
+          images.push(resp.data.result);
         } else {
           console.error('Failed to generate image for prompt:', element.imagePrompt);
         }
       }
 
-      setVideoData(prev=>({
+      setVideoData(prev => ({
         ...prev,
         'imageList': images
-      }))
-  
-      // Set the images in state to be displayed or further processed
-      setImageList(images);  // Store generated image URLs in state
+      }));
+      setImageList(images);
     } catch (error) {
       console.error('Error generating images:', error);
     } finally {
-      setLoading(false);  // Hide loading when done
+      setLoading(false);
     }
   };
-  
 
-useEffect(()=>{
-  console.log(videoData);
-  if(Object.keys(videoData).length==4){
-    SaveVideoData(videoData);
-  }
-}, [videoData]);
+  useEffect(() => {
+    console.log(videoData);
+    if (Object.keys(videoData).length === 4) {
+      SaveVideoData(videoData);
+    }
+  }, [videoData]);
 
+  const SaveVideoData = async (videoData) => {
+    setLoading(true);
 
-// save the video to neo.
-const SaveVideoData = async (videoData) => {
-  setLoading(true);
+    const result = await db.insert(VideoData).values({
+      script: videoData?.videoScript,
+      audioFileUrl: videoData?.audioFileUrl,
+      captions: videoData?.captions,
+      imageList: videoData?.imageList,
+      createdBy: user?.primaryEmailAddress?.emailAddress,
+    }).returning({ id: VideoData?.id });
+    console.log(result);
+    setLoading(false);
+    // Clear all states
+    // Navigate to dashboard
+    window.location.href = '/dashboard';
+    
+  };
 
-  const result=await db.insert(VideoData).values({
-    script:videoData?.videoScript,
-    audioFileUrl:videoData?.audioFileUrl,
-    captions:videoData?.captions,
-    imageList:videoData?.imageList,
-    createdBy:user?.primaryEmailAddress?.emailAddress,
-  }).returning({id:VideoData?.id});
-
-  setVideoId(result[0].id);
-  setPlayVideo(true);
-  console.log(result);
-  setLoading(false);
    
-};
+
 
 
   return (
@@ -197,7 +182,7 @@ const SaveVideoData = async (videoData) => {
         <Button className='mt-10 w-full' onClick={onCreateClickHandler}>Create Short Video</Button>
       </div>
       <CustomLoading loading={loading} />
-      <PlayerDialog playVideo={playVideo} videoId={videoId}/>
+      {/* <PlayerDialog playVideo={playVideo} videoId={videoId}/> */}
     </div>
   )
 }

@@ -1,5 +1,7 @@
+ 
+
 import React, {useEffect} from 'react';
-import { AbsoluteFill, Audio, Img, Sequence, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, Img, interpolate, Sequence, useCurrentFrame, useVideoConfig } from 'remotion';
 
 
 function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationInFrame }) {
@@ -26,16 +28,28 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
 
     return (
         <AbsoluteFill className='bg-black'>
-            {imageList?.map((item, index) => (
+            {imageList?.map((item, index) =>
+            {
+                const startTime=(index * getDurationFrames()) / imageList?.length;
+                const duration=getDurationFrames();
+                const scale= (index)=> interpolate(
+                    frame,
+                    [startTime, startTime + duration/2, startTime + duration],
+                    index%2==0 ?[1, 1.8, 1]:[1.8, 1, 1.8],
+                    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
+                );
+                return (
                 <>
-                    <Sequence key={index} from={((index * getDurationFrames()) / imageList?.length)} durationInFrames={getDurationFrames()}>
+                    <Sequence key={index} from={startTime} durationInFrames={duration}>
                         <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <Img
                                 src={item}
                                 style={{
                                     width: '100%',
                                     height: '100%',
-                                    objectFit: 'cover'
+                                    objectFit: 'cover',
+                                    transform: `scale(${scale})`
+
                                 }}
                             />
                             <AbsoluteFill style={{
@@ -54,7 +68,7 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
                         </AbsoluteFill>
                     </Sequence>
                 </>
-            ))}
+            )})}
             {audioFileUrl ? (
                 <Audio src={audioFileUrl} />
             ) : (
