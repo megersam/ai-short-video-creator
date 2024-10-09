@@ -1,8 +1,5 @@
- 
-
-import React, {useEffect} from 'react';
+import React from 'react';
 import { AbsoluteFill, Audio, Img, interpolate, Sequence, useCurrentFrame, useVideoConfig } from 'remotion';
-
 
 function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationInFrame }) {
     const { fps } = useVideoConfig();
@@ -18,38 +15,34 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
         const currentCaption = captions.find(
             (word) => currentTime >= word.start && currentTime <= word.end
         );
-        return currentCaption?currentCaption?.text:'';
-       
+        return currentCaption ? currentCaption?.text : '';
     };
-    
-
-    
-
 
     return (
         <AbsoluteFill className='bg-black'>
-            {imageList?.map((item, index) =>
-            {
-                const startTime=(index * getDurationFrames()) / imageList?.length;
-                const duration=getDurationFrames();
-                const scale= (index)=> interpolate(
+            {imageList?.map((item, index) => {
+                const startTime = (index * getDurationFrames()) / imageList?.length;
+                const duration = getDurationFrames();
+
+                // Updated scale interpolation logic
+                const scale = interpolate(
                     frame,
-                    [startTime, startTime + duration/2, startTime + duration],
-                    index%2==0 ?[1, 1.8, 1]:[1.8, 1, 1.8],
-                    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
+                    [startTime, startTime + duration / 2, startTime + duration],
+                    index % 2 === 0 ? [1, 1.8, 1] : [1.8, 1, 1.8],
+                    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
                 );
+
                 return (
-                <>
                     <Sequence key={index} from={startTime} durationInFrames={duration}>
                         <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            {/* Apply the scale interpolation here */}
                             <Img
                                 src={item}
                                 style={{
                                     width: '100%',
                                     height: '100%',
                                     objectFit: 'cover',
-                                    transform: `scale(${scale})`
-
+                                    transform: `scale(${scale})` // Use the scale value here
                                 }}
                             />
                             <AbsoluteFill style={{
@@ -62,13 +55,13 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
                                 width: '100%'
                             }}>
                                 <h2 className='text-2xl'>
-                                  {getCurrentCaptions()}
+                                    {getCurrentCaptions()}
                                 </h2>
                             </AbsoluteFill>
                         </AbsoluteFill>
                     </Sequence>
-                </>
-            )})}
+                );
+            })}
             {audioFileUrl ? (
                 <Audio src={audioFileUrl} />
             ) : (

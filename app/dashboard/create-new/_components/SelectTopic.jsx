@@ -10,7 +10,17 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 
 function SelectTopic({onUserSelect}) {
-    const options=['Custom Promts', 'Random AI story', 'Scary Story', 'kids story', 'Animal Story']
+    const options=[
+        'Custom Promts', 
+        'kids story', 
+        'Animal Story',
+        'Motivational',
+        'life couch',
+        'short funny story',
+        'Random AI story', 
+        'Scary Story', 
+        
+    ]
     const [selectedOption, setSelectedOption]=useState();
     return (
         <div>

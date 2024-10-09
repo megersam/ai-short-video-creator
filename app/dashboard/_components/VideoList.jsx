@@ -35,7 +35,9 @@ function VideoList({videoList}) {
                 />
             </div>
         ))}
-        <PlayerDialog playVideo={openPlayDialog} videoId={videoId}/>
+         {openPlayDialog && (
+        <PlayerDialog playVideo={openPlayDialog} videoId={videoId} />
+      )}
     </div>
   )
 }

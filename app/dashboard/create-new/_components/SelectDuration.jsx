@@ -20,8 +20,10 @@ function SelectDuration({onUserSelect}) {
         </SelectTrigger>
         <SelectContent>
             <SelectItem value='30 seconds'> 30 Seconds</SelectItem>
-            <SelectItem value='60 seconds'> 60 Seconds</SelectItem>
-            <SelectItem value='90 seconds'> 90 Seconds</SelectItem>
+            <SelectItem value='60 seconds'> 1 Minute</SelectItem>
+            <SelectItem value='90 seconds'> 1:30 Minutes</SelectItem>
+            <SelectItem value='120 seconds'> 2:00 Minutes</SelectItem>
+            <SelectItem value='180 seconds'> 3:00 Minutes</SelectItem>
              
         </SelectContent>
     </Select>

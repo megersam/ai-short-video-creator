@@ -11,9 +11,9 @@ import VideoList from "./_components/VideoList";
 
 
 function Dashboard() {
-    
-    const [videoList, setVideoList] = useState([]);
     const {user} = useUser();
+    const [videoList, setVideoList] = useState([]);
+    
 
     // used to get users video.
 

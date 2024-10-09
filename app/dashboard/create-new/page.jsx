@@ -18,7 +18,8 @@ import { useRouter } from 'next/navigation';
 
 function CreateNew() {
   const [formData, setFormData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
+  const [statusMessage, setStatusMessage] = useState(''); // New state for status message
   const [videoScript, setVideoScript] = useState();
   const [audioFileUrl, setAudioFileUrl] = useState();
   const [captions, setCaptions] = useState();
@@ -43,7 +44,13 @@ function CreateNew() {
   // get video script.
   const GetVideoScript = async () => {
     setLoading(true);
-    const prompt = 'Write a script to generate ' + formData.duration + ' video on topic ' + formData.topic + ' along with AI image propmt in ' + formData.imageStyle + ' format for each scene and give result in JSON format with image prompt and content Text as field, No plain Text';
+    setStatusMessage('Generating script...');
+    const prompt = `Write a complete video script for a duration of exactly ${formData.duration} seconds on the topic "${formData.topic}". 
+    Each scene should include an AI image prompt in the style of "${formData.imageStyle}", along with descriptive content text. 
+    Ensure that the script covers the entire requested time (${formData.duration} seconds) and includes a clear conclusion at the end. 
+    Provide the result in structured JSON format with fields for "imagePrompt" and "contentText" for each scene. 
+    Do not truncate or provide partial responses. No plain text, only JSON.`;
+    
     console.log(prompt);
     const resp = await axios.post('/api/get-video-script', {
       prompt: prompt
@@ -54,6 +61,7 @@ function CreateNew() {
         'videoScript': resp.data.result
       }));
       setVideoScript(resp.data.result);
+      setStatusMessage('Script generated! Generating audio...');
       await GenerateAudioFile(resp.data.result);
     }
   }
@@ -79,6 +87,7 @@ function CreateNew() {
           'audioFileUrl': firebaseAudioUrl
         }));
         setAudioFileUrl(firebaseAudioUrl);
+        setStatusMessage('Audio generated! Generating captions...');
         await GenerateAudioCaption(firebaseAudioUrl, videoScriptData);
       }
     } catch (error) {
@@ -99,6 +108,7 @@ function CreateNew() {
           ...prev,
           'captions': resp.data.result
         }));
+        setStatusMessage('Captions generated! Generating images...');
         await GenerateImage(videoScriptData);
       }
     } catch (error) {
@@ -130,6 +140,7 @@ function CreateNew() {
         'imageList': images
       }));
       setImageList(images);
+      setStatusMessage('Images generated! Saving video data...');
     } catch (error) {
       console.error('Error generating images:', error);
     } finally {
@@ -138,11 +149,11 @@ function CreateNew() {
   };
 
   useEffect(() => {
-    console.log(videoData);
-    if (Object.keys(videoData).length === 4) {
+    if (videoData && Object.keys(videoData).length === 4) {
       SaveVideoData(videoData);
     }
   }, [videoData]);
+  
 
   const SaveVideoData = async (videoData) => {
     setLoading(true);
@@ -158,7 +169,9 @@ function CreateNew() {
     setLoading(false);
     // Clear all states
     // Navigate to dashboard
-    window.location.href = '/dashboard';
+    setVideoData(null);
+    router.push('/dashboard');
+    // window.location.href = '/dashboard';
     
   };
 
@@ -181,7 +194,7 @@ function CreateNew() {
         {/* create a button */}
         <Button className='mt-10 w-full' onClick={onCreateClickHandler}>Create Short Video</Button>
       </div>
-      <CustomLoading loading={loading} />
+      <CustomLoading loading={loading} status={statusMessage} />
       {/* <PlayerDialog playVideo={playVideo} videoId={videoId}/> */}
     </div>
   )
