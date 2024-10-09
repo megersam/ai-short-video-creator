@@ -1,14 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
+import LandingHeader from "./components/LandingHeader";
+import HeroPage from "./components/HeroPage";
+import ContentPage from "./components/ContentPage";
 
 export default function Home() {
   return (
     <div>
-      <h2> Wellcome</h2>
-      <Button  >Subscribe</Button>
-
-      <UserButton />
+       <LandingHeader/>
+       <div></div>
+       <HeroPage/>
+       <div></div>
+       <ContentPage/>
     </div>
   );
 }
