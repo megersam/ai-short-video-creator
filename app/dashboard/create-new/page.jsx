@@ -44,27 +44,37 @@ function CreateNew() {
   // get video script.
   const GetVideoScript = async () => {
     setLoading(true);
-    setStatusMessage('Generating script...');
-    const prompt = `Write a complete video script for a duration of exactly ${formData.duration} seconds on the topic "${formData.topic}". 
-    Each scene should include an AI image prompt in the style of "${formData.imageStyle}", along with descriptive content text. 
-    Ensure that the script covers the entire requested time (${formData.duration} seconds) and includes a clear conclusion at the end. 
-    Provide the result in structured JSON format with fields for "imagePrompt" and "contentText" for each scene. 
-    Do not truncate or provide partial responses. No plain text, only JSON.`;
+    const expectedNumberOfScenes = 5; // Adjust based on your preference
+    const expectedPacing = Math.ceil(formData.duration / expectedNumberOfScenes);
     
-    console.log(prompt);
-    const resp = await axios.post('/api/get-video-script', {
-      prompt: prompt
-    });
-    if (resp.data.result) {
-      setVideoData(prev => ({
-        ...prev,
-        'videoScript': resp.data.result
-      }));
-      setVideoScript(resp.data.result);
-      setStatusMessage('Script generated! Generating audio...');
-      await GenerateAudioFile(resp.data.result);
+    const prompt = `Create a rich, complete video script that lasts exactly ${formData.duration} seconds on the topic "${formData.topic}". 
+    Each scene must include an AI image prompt in the style of "${formData.imageStyle}" and descriptive content text. 
+    Assume a pacing of approximately ${expectedPacing} seconds per scene. 
+    Ensure that the total duration of the script matches the specified duration (${formData.duration} seconds) precisely, 
+    including pacing considerations for video motion. The script should conclude clearly at the end. 
+    The output should be structured in JSON format, with fields for "imagePrompt" and "contentText" for each scene. 
+    Avoid truncating the script or providing partial responses. Ensure the script is fully developed and complete.`;
+    
+    try {
+      const resp = await axios.post('/api/get-video-script', {
+        prompt: prompt
+      });
+  
+      if (resp.data.result) {
+        setVideoData(prev => ({
+          ...prev,
+          'videoScript': resp.data.result
+        }));
+        setVideoScript(resp.data.result);
+        await GenerateAudioFile(resp.data.result);
+      }
+    } catch (error) {
+      console.error('Error generating video script:', error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+  
 
   const GenerateAudioFile = async (videoScriptData) => {
     setLoading(true);
