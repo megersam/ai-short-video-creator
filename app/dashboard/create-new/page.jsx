@@ -10,9 +10,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { VideoDataContext } from '@/app/_context/VideoDataContext';
 import { useUser } from '@clerk/nextjs';
 import { db } from '@/configs/db';
-import { VideoData } from '@/configs/schema';
+import { Users, VideoData } from '@/configs/schema';
 import PlayerDialog from '../_components/PlayerDialog';
 import { useRouter } from 'next/navigation';
+import {UserDetailContext} from '@/app/_context/UserDetailContext';
+import { toast } from 'sonner';
+import { eq } from 'drizzle-orm';
 
 
 
@@ -25,6 +28,7 @@ function CreateNew() {
   const [captions, setCaptions] = useState();
   const [imagList, setImageList] = useState();
   const { videoData, setVideoData } = useContext(VideoDataContext);
+  const {userDetail, setUserDetail} = useContext(UserDetailContext);
   const { user } = useUser(); 
   const router = useRouter();
   const [saved, setSaved] = useState(false);  // Added saved state
@@ -38,12 +42,22 @@ function CreateNew() {
   };
 
   const onCreateClickHandler = () => {
-    GetVideoScript();
-  };
-
+    console.log(userDetail?.credits);
+    if (userDetail?.credits < 1) {  // Check if credits are less than 0
+      toast("You don't have enough credits", {
+        style: {
+          backgroundColor: 'red',
+          color: 'white',
+        },
+      });
+      return;
+    }
+    GetVideoScript(); // Otherwise, proceed
+};
   // get video script.
   const GetVideoScript = async () => {
     setLoading(true);
+    setStatusMessage('Generating Script...');
     const expectedNumberOfScenes = 5; // Adjust based on your preference
     const totalScenesDuration = formData.duration - 10; // Reserve 10 seconds for conclusion
     const expectedPacing = Math.ceil(totalScenesDuration / expectedNumberOfScenes);
@@ -179,6 +193,7 @@ function CreateNew() {
       imageList: videoData?.imageList,
       createdBy: user?.primaryEmailAddress?.emailAddress,
     }).returning({ id: VideoData?.id });
+    await UpdateUserCredits();
     console.log(result);
     setLoading(false);
     // Clear all states
@@ -189,7 +204,16 @@ function CreateNew() {
     
   };
 
-   
+  //  user credits.
+  const UpdateUserCredits= async()=>{
+    const result = await db.update(Users).set({
+      credits: userDetail?.credits-5
+    }).where(eq(Users?.email,user?.primaryEmailAddress?.emailAddress));
+     setUserDetail(prev=>({
+      ...prev,
+      "credits": userDetail?.credits-5
+     }))
+  }
 
 
 

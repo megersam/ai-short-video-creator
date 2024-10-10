@@ -1,18 +1,19 @@
 'use client'
 import { Button } from "@/components/ui/button";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import EmptyState from "./_components/EmptyState";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { db } from "@/configs/db";
 import { VideoData } from "@/configs/schema";
 import { eq } from "drizzle-orm"; 
-import VideoList from "./_components/VideoList";
+import VideoList from "./_components/VideoList";  
 
 
 function Dashboard() {
     const {user} = useUser();
-    const [videoList, setVideoList] = useState([]);
+    const [videoList, setVideoList] = useState([]); 
+
     
 
     // used to get users video.

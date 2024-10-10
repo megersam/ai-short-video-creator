@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Provider from "./provider";
 import {Outfit} from 'next/font/google'
+import { Toaster } from "@/components/ui/sonner";
  
 
 export const metadata = {
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
         <Provider>
         {children}
         </Provider>
-        
+        <Toaster/>
       </body>
     </html>
     </ClerkProvider>
