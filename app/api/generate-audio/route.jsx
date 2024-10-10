@@ -8,7 +8,7 @@ const client = new textToSpeechClient.TextToSpeechClient({
   apiKey: process.env.GOOGLE_API_KEY,
 });
 
-
+export const runtime = "nodejs"
 
 export async function POST(req) {
   const { text, id } = await req.json();

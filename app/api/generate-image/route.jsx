@@ -7,7 +7,7 @@ import axios from "axios"; // Ensure axios is imported
 // export const config = {
 //   runtime: "nodejs", // Switch to Node.js runtime to allow background functions
 // };
-
+export const runtime = "nodejs"
 export async function POST(req) {
   try {
     // Fix the variable name
