@@ -45,13 +45,14 @@ function CreateNew() {
   const GetVideoScript = async () => {
     setLoading(true);
     const expectedNumberOfScenes = 5; // Adjust based on your preference
-    const expectedPacing = Math.ceil(formData.duration / expectedNumberOfScenes);
+    const totalScenesDuration = formData.duration - 10; // Reserve 10 seconds for conclusion
+    const expectedPacing = Math.ceil(totalScenesDuration / expectedNumberOfScenes);
     
-    const prompt = `Create a rich, complete video script that lasts exactly ${formData.duration} seconds on the topic "${formData.topic}". 
+    const prompt = `Create a complete video script that lasts exactly ${formData.duration} seconds on the topic "${formData.topic}". 
     Each scene must include an AI image prompt in the style of "${formData.imageStyle}" and descriptive content text. 
-    Assume a pacing of approximately ${expectedPacing} seconds per scene. 
     Ensure that the total duration of the script matches the specified duration (${formData.duration} seconds) precisely, 
-    including pacing considerations for video motion. The script should conclude clearly at the end. 
+    with the last 10 seconds reserved for a clear and effective conclusion that summarizes the key points of the video. 
+    Distribute the remaining time across the preceding scenes, ensuring each scene maintains a pacing of approximately ${expectedPacing} seconds. 
     The output should be structured in JSON format, with fields for "imagePrompt" and "contentText" for each scene. 
     Avoid truncating the script or providing partial responses. Ensure the script is fully developed and complete.`;
     
@@ -66,6 +67,7 @@ function CreateNew() {
           'videoScript': resp.data.result
         }));
         setVideoScript(resp.data.result);
+        setStatusMessage('Script generated! Generating Audio...');
         await GenerateAudioFile(resp.data.result);
       }
     } catch (error) {
@@ -74,6 +76,7 @@ function CreateNew() {
       setLoading(false);
     }
   };
+  
   
 
   const GenerateAudioFile = async (videoScriptData) => {
