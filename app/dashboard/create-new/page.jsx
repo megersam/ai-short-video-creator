@@ -149,6 +149,7 @@ function CreateNew() {
   };
 
   useEffect(() => {
+    console.log(videoData)
     if (videoData && Object.keys(videoData).length === 4) {
       SaveVideoData(videoData);
     }
