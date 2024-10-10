@@ -8,10 +8,7 @@ const client = new textToSpeechClient.TextToSpeechClient({
   apiKey: process.env.GOOGLE_API_KEY,
 });
 
-// Use background functions to prevent timeout issues
-export const config = {
-  runtime: "nodejs", // Switch to Node.js runtime to allow background functions
-};
+
 
 export async function POST(req) {
   const { text, id } = await req.json();

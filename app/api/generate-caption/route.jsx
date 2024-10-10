@@ -2,9 +2,9 @@ import { AssemblyAI } from "assemblyai";
 import { NextResponse } from "next/server";
 
 
-export const config = {
-    runtime: "nodejs", // Switch to Node.js runtime to allow background functions
-  };
+// export const config = {
+//     runtime: "nodejs", // Switch to Node.js runtime to allow background functions
+//   };
 
 export async function POST(req) {
     try {
