@@ -21,7 +21,7 @@ function SideNav() {
         {
             id:3,
             name:"Upgrade",
-            path: '/dashboard/upgrade',
+            path: '/dashboard/payment-plan',
             icon: ShieldIcon
         },
         {
