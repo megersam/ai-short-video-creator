@@ -49,3 +49,15 @@ Make sure you have the following installed:
    cd ai-short-video-creator
    npm install
    npm run dev
+
+ 2. **create .env File**:
+       ```bash
+NEXT_PUBLIC_CLERK_FRONTEND_API=your-clerk-frontend-api-key
+CLERK_API_KEY=your-clerk-backend-api-key
+GOOGLE_GEMINI_API_KEY=your-google-gemini-api-key
+REPLICATE_API_KEY=your-replicate-api-key
+DATABASE_URL=your-postgresql-database-url
+Firebase_API_Key=your firebase store api key
+Next_PUBLIC_NEON = your neon database key
+
+
