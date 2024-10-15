@@ -25,7 +25,7 @@
 
 ## Demo
 
-Live application: [AI Short Video Creator](https://ai-short-video-creator.netlify.app/)
+Live application: [AI Short Video Creator](https://short-video-creator.netlify.app/)
 
  
 
