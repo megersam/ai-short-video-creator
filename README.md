@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# AI Short Video Creator
+
+**AI Short Video Creator** is a SaaS-based platform that converts user ideas into videos by generating stories, audio, captions, and images using AI technologies such as Google Gemini AI and Replicate AI. The final result is a seamlessly rendered video from the generated assets. The platform supports monthly subscriptions and uses Clerk for authentication.
+
+## Features
+
+- **Idea to Prompt**: Converts user ideas into AI-generated prompts.
+- **Story Generation**: Creates stories using the AI-generated prompts.
+- **Audio and Captions**: Converts the generated stories into audio with synchronized captions.
+- **Image Generation**: Creates image prompts and generates visuals to accompany the story.
+- **Video Creation**: Combines the audio, captions, and images into a final video.
+- **Authentication**: Clerk-based user authentication and subscription management.
+- **Subscription Plans**: Offers monthly subscription-based access to premium features.
+
+## Technologies Used
+
+- **Framework**: Next.js
+- **Frontend**: React.js (with Next.js)
+- **Backend**: Node.js, Express.js
+- **Database**: PostgreSQL (for storing user data, subscriptions, and projects)
+- **AI**: Google Gemini AI (for story generation), Replicate AI (for image generation)
+- **Authentication**: Clerk (for user auth and subscription management)
+- **Deployment**: Netlify (Frontend)
+- **Version Control**: GitHub
+
+## Demo
+
+Live application: [AI Short Video Creator](https://ai-short-video-creator.netlify.app/)
+
+ 
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Make sure you have the following installed:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Node.js
+- PostgreSQL
+- Git
+- Clerk account (for authentication setup)
+- API keys for Google Gemini AI and Replicate AI
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Installation
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/megersam/ai-short-video-creator.git
+   cd ai-short-video-creator
+   npm install
+   npm run dev
